@@ -455,7 +455,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             });
 
                             if (taskScope.task.isResizing) {
-                                taskHasBeenMovedFromAnotherRow = true;
+                                // PATCH: Fixed bug which caused tasks to "jump around" when being drawn.
+                                taskHasBeenMovedFromAnotherRow = false;
                                 enableMoveMode('E', taskScope.task.mouseOffsetX);
                                 delete taskScope.task.isResizing;
                             } else if (taskScope.task.isMoving) {
@@ -490,7 +491,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 }());
 
 
-angular.module('gantt.movable.templates', []).run(['$templateCache', function($templateCache) {
+angular.module('gantt.movable.templates', []).run(['$templateCache', function ($templateCache) {
 
 }]);
 

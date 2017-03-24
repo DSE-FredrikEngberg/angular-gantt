@@ -19,233 +19,233 @@ module.exports = function(grunt) {
         }
     };
 
-    var config = {
-        pkg: grunt.file.readJSON('package.json'),
-        html2js: {
-            options: {
-                quoteChar: '\'',
-                indentString: '    ',
-                module: 'gantt.templates',
-                singleModule: true
-            },
-            core: {
-                src: ['src/template/**/*.html'],
-                dest: '.tmp/generated/core/html2js.js'
-            }
-        },
-        concat: {
-            options: {
-                separator: '\n',
-                sourceMap: true,
-                banner: '/*\n' +
-                'Project: <%= pkg.name %> v<%= pkg.version %> - <%= pkg.description %>\n' +
-                'Authors: <%= pkg.author %>, <%= pkg.contributors %>\n' +
-                'License: <%= pkg.license %>\n' +
-                'Homepage: <%= pkg.homepage %>\n' +
-                'Github: <%= pkg.repository.url %>\n' +
-                '*/\n'
-            },
-            core: {
-                src: sources.js.core,
-                dest: 'assets/<%= pkg.name %>.js'
-            },
-            plugins: {
-                src: sources.js.plugins,
-                dest: 'assets/<%= pkg.name %>-plugins.js'
-            }
-        },
-        concatCss: {
-            core: {
-                src: sources.css.core,
-                dest: 'assets/<%= pkg.name %>.css'
-            },
-            plugins: {
-                src: sources.css.plugins,
-                dest: 'assets/<%= pkg.name %>-plugins.css'
-            }
-        },
-        cleanempty: {
-            options: {},
-            assets: 'assets/**/*'
-        },
-        clean: {
-            site: ['site'],
-            dist: ['dist']
-        },
-        uglify: {
-            options: {
-                banner: '/*\n' +
-                'Project: <%= pkg.name %> v<%= pkg.version %> - <%= pkg.description %>\n' +
-                'Authors: <%= pkg.author %>, <%= pkg.contributors %>\n' +
-                'License: <%= pkg.license %>\n' +
-                'Homepage: <%= pkg.homepage %>\n' +
-                'Github: <%= pkg.repository.url %>\n' +
-                '*/\n',
-                sourceMap: true
-            },
-            core: {
-                files: {
-                    'dist/<%= pkg.name %>.min.js': sources.js.core
+        var config = {
+            pkg: grunt.file.readJSON('package.json'),
+            html2js: {
+                options: {
+                    quoteChar: '\'',
+                    indentString: '    ',
+                    module: 'gantt.templates',
+                    singleModule: true
+                },
+                core: {
+                    src: ['src/template/**/*.html'],
+                    dest: '.tmp/generated/core/html2js.js'
                 }
             },
-            plugins: {
-                files: {
-                    'dist/<%= pkg.name %>-plugins.min.js': sources.js.plugins
+            concat: {
+                options: {
+                    separator: '\n',
+                    sourceMap: true,
+                    banner: '/*\n' +
+                    'Project: <%= pkg.name %> v<%= pkg.version %> - <%= pkg.description %>\n' +
+                    'Authors: <%= pkg.author %>, <%= pkg.contributors %>\n' +
+                    'License: <%= pkg.license %>\n' +
+                    'Homepage: <%= pkg.homepage %>\n' +
+                    'Github: <%= pkg.repository.url %>\n' +
+                    '*/\n'
+                },
+                core: {
+                    src: sources.js.core,
+                    dest: 'assets/<%= pkg.name %>.js'
+                },
+                plugins: {
+                    src: sources.js.plugins,
+                    dest: 'assets/<%= pkg.name %>-plugins.js'
                 }
-            }
-        },
-        cssmin: {
-            core: {
-                src: sources.css.core,
-                dest: 'dist/<%= pkg.name %>.min.css'
             },
-            plugins: {
-                src: sources.css.plugins,
-                dest: 'dist/<%= pkg.name %>-plugins.min.css'
-            }
-        },
-        copy: {
-            assetsToDist: {
-                files: [
-                    // includes files within path
-                    {expand: true, cwd: 'assets/', src: ['**'], dest: 'dist/'},
-                ]
-            },
-            demoToSite: {
-                files: [
-                    // includes files within path
-                    {expand: true, cwd: 'demo/dist/', src: ['**'], dest: 'site/demo'},
-                ]
-            },
-            ghPagesToSite: {
-                files: [
-                    // includes files within path
-                    {expand: true, cwd: 'gh-pages/', src: ['**'], dest: 'site/'},
-                ]
-            }
-        },
-        jshint: {
-            src: {
-                options: {
-                    jshintrc: '.jshintrc',
-                    reporter: require('jshint-stylish')
+            concatCss: {
+                core: {
+                    src: sources.css.core,
+                    dest: 'assets/<%= pkg.name %>.css'
                 },
-                src: ['Gruntfile.js', 'src/**/*.js']
+                plugins: {
+                    src: sources.css.plugins,
+                    dest: 'assets/<%= pkg.name %>-plugins.css'
+                }
             },
-            test: {
+            cleanempty: {
+                options: {},
+                assets: 'assets/**/*'
+            },
+            clean: {
+                site: ['site'],
+                dist: ['dist']
+            },
+            uglify: {
                 options: {
-                    jshintrc: 'test/spec/.jshintrc'
+                    banner: '/*\n' +
+                    'Project: <%= pkg.name %> v<%= pkg.version %> - <%= pkg.description %>\n' +
+                    'Authors: <%= pkg.author %>, <%= pkg.contributors %>\n' +
+                    'License: <%= pkg.license %>\n' +
+                    'Homepage: <%= pkg.homepage %>\n' +
+                    'Github: <%= pkg.repository.url %>\n' +
+                    '*/\n',
+                    sourceMap: true
                 },
-                src: ['test/spec/**/*.js']
-            }
-        },
-        watch: {
-            files: [].concat(sources.js.core, sources.js.plugins, sources.css.core, sources.css.plugins, ['src/**/*.html']),
-            tasks: ['build']
-        },
-        autoprefixer: {
-            options: {
-                // Task-specific options go here.
-            },
-            core: {
-                src: sources.css.core
-            },
-            plugins: {
-                src: sources.css.plugins
-            }
-        },
-        karma: {
-            unit: {
-                configFile: coverage ? 'test/karma-coverage.conf.js' : 'test/karma.conf.js',
-                singleRun: true
-            }
-        },
-        coveralls: {
-            options: {
-                force: true,
-                coverageDir: 'coverage-results',
-                recursive: true
-            }
-        },
-        connect: {
-            options: {
-                port: 9101,
-                hostname: '0.0.0.0',
-                keepalive: true,
-                livereload: 39729
-            },
-            plunker: {
-                options: {
-                    open: true,
-                    middleware: function(connect) {
-                        return [
-                            connect().use(
-                                '/bower_components', connect.static('./bower_components')
-                            ),
-                            connect().use(
-                                '/assets', connect.static('./assets')
-                            ),
-                            connect().use(
-                                '/dist', connect.static('./dist')
-                            ),
-                            connect.static('plunker')
-                        ];
+                core: {
+                    files: {
+                        'dist/<%= pkg.name %>.min.js': sources.js.core
+                    }
+                },
+                plugins: {
+                    files: {
+                        'dist/<%= pkg.name %>-plugins.min.js': sources.js.plugins
                     }
                 }
-            }
-        },
-        run: {
-            buildDemo: {
-                options: {
-                    cwd: 'demo'
-                },
-                cmd: 'grunt'
             },
-            buildDocs: {
-                exec: 'mkdocs build --clean'
-            }
-        },
-        replace: {
-            site: {
-                options: {
-                    patterns: [
-                        {
-                            match: 'version',
-                            replacement: '<%= pkg.version %>'
-                        }
+            cssmin: {
+                core: {
+                    src: sources.css.core,
+                    dest: 'dist/<%= pkg.name %>.min.css'
+                },
+                plugins: {
+                    src: sources.css.plugins,
+                    dest: 'dist/<%= pkg.name %>-plugins.min.css'
+                }
+            },
+            copy: {
+                assetsToDist: {
+                    files: [
+                        // includes files within path
+                        {expand: true, cwd: 'assets/', src: ['**'], dest: 'dist/'},
                     ]
                 },
-                files: [
-                    {src: ['site/index.html'], dest: './'}
-                ]
-            },
-            siteIndexTitle: {
-                options: {
-                    patterns: [
-                        {
-                            match: /<title>.*?<\/title>/,
-                            replacement: '<title>Angular Gantt - Gantt chart component for AngularJS</title>\n'+
-                                         '        <meta property="og:title" content="Angular Gantt" />\n'+
-                                         '        <meta property="og:description" content="Gantt chart component for AngularJS" />\n'+
-                                         '        <meta property="og:type" content="website" />\n'+
-                                         '        <meta property="og:url" content="https://www.angular-gantt.com/" />\n'+
-                                         '        <meta property="og:image" content="https://www.angular-gantt.com/img/angular-gantt.png" />'
-                        }
+                demoToSite: {
+                    files: [
+                        // includes files within path
+                        {expand: true, cwd: 'demo/dist/', src: ['**'], dest: 'site/demo'},
                     ]
                 },
-                files: [
-                    {src: ['site/index.html'], dest: './'}
-                ]
-            }
-        },
-        'gh-pages': {
-            options: {
-                base: 'site',
-                message: 'chore(site): Automatic update (grunt-gh-pages)'
+                ghPagesToSite: {
+                    files: [
+                        // includes files within path
+                        {expand: true, cwd: 'gh-pages/', src: ['**'], dest: 'site/'},
+                    ]
+                }
             },
-            src: ['**']
-        }
-    };
+            jshint: {
+                src: {
+                    options: {
+                        jshintrc: '.jshintrc',
+                        reporter: require('jshint-stylish')
+                    },
+                    src: ['Gruntfile.js', 'src/**/*.js']
+                },
+                test: {
+                    options: {
+                        jshintrc: 'test/spec/.jshintrc'
+                    },
+                    src: ['test/spec/**/*.js']
+                }
+            },
+            watch: {
+                files: [].concat(sources.js.core, sources.js.plugins, sources.css.core, sources.css.plugins, ['src/**/*.html']),
+                tasks: ['build']
+            },
+            autoprefixer: {
+                options: {
+                    // Task-specific options go here.
+                },
+                core: {
+                    src: sources.css.core
+                },
+                plugins: {
+                    src: sources.css.plugins
+                }
+            },
+            karma: {
+                unit: {
+                    configFile: coverage ? 'test/karma-coverage.conf.js' : 'test/karma.conf.js',
+                    singleRun: true
+                }
+            },
+            coveralls: {
+                options: {
+                    force: true,
+                    coverageDir: 'coverage-results',
+                    recursive: true
+                }
+            },
+            connect: {
+                options: {
+                    port: 9101,
+                    hostname: '0.0.0.0',
+                    keepalive: true,
+                    livereload: 39729
+                },
+                plunker: {
+                    options: {
+                        open: true,
+                        middleware: function(connect) {
+                            return [
+                                connect().use(
+                                    '/bower_components', connect.static('./bower_components')
+                                ),
+                                connect().use(
+                                    '/assets', connect.static('./assets')
+                                ),
+                                connect().use(
+                                    '/dist', connect.static('./dist')
+                                ),
+                                connect.static('plunker')
+                            ];
+                        }
+                    }
+                }
+            },
+            run: {
+                buildDemo: {
+                    //options: {
+                        //cwd: 'demo'
+                    //},
+                    //cmd: '#grunt'
+                },
+                buildDocs: {
+                    //exec: '#mkdocs build --clean'
+                }
+            },
+            replace: {
+                site: {
+                    options: {
+                        patterns: [
+                            {
+                                match: 'version',
+                                replacement: '<%= pkg.version %>'
+                            }
+                        ]
+                    },
+                    files: [
+                        {src: ['site/index.html'], dest: './'}
+                    ]
+                },
+                siteIndexTitle: {
+                    options: {
+                        patterns: [
+                            {
+                                match: /<title>.*?<\/title>/,
+                                replacement: '<title>Angular Gantt - Gantt chart component for AngularJS</title>\n'+
+                                '        <meta property="og:title" content="Angular Gantt" />\n'+
+                                '        <meta property="og:description" content="Gantt chart component for AngularJS" />\n'+
+                                '        <meta property="og:type" content="website" />\n'+
+                                '        <meta property="og:url" content="https://www.angular-gantt.com/" />\n'+
+                                '        <meta property="og:image" content="https://www.angular-gantt.com/img/angular-gantt.png" />'
+                            }
+                        ]
+                    },
+                    files: [
+                        {src: ['site/index.html'], dest: './'}
+                    ]
+                }
+            },
+            'gh-pages': {
+                options: {
+                    base: 'site',
+                    message: 'chore(site): Automatic update (grunt-gh-pages)'
+                },
+                src: ['**']
+            }
+        };
 
     for (var i = 0; i < plugins.length; i++) {
         var plugin = plugins[i];

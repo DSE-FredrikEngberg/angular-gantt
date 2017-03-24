@@ -40,8 +40,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             var endDate = moment(startDate);
 
                             var taskModel = scope.taskModelFactory();
-                            taskModel.from = startDate;
-                            taskModel.to = endDate;
+                            // PATCH: Snap to magnet units.
+                            taskModel.from = startDate.startOf(directiveScope.row.rowsManager.gantt.columnMagnetUnit);
+                            taskModel.to = endDate.endOf(directiveScope.row.rowsManager.gantt.columnMagnetUnit);
 
                             var task = directiveScope.row.addTask(taskModel);
                             task.isResizing = true;
@@ -69,7 +70,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                         var drawHandler = function(evt) {
                             var evtTarget = (evt.target ? evt.target : evt.srcElement);
-                            var enabled = angular.isFunction(scope.enabled) ? scope.enabled(evt): scope.enabled;
+                            // PATCH:   Added second parameter "directiveScope.row" in call to enabled()-function.
+                            //          The row information is required to determine if a task may be created for this
+                            //          row or not.
+                            var enabled = angular.isFunction(scope.enabled) ? scope.enabled(evt, directiveScope.row): scope.enabled;
                             if (enabled && evtTarget.className.indexOf('gantt-row') > -1) {
                                 var x = mouseOffset.getOffset(evt).x;
 
@@ -98,7 +102,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 }());
 
 
-angular.module('gantt.drawtask.templates', []).run(['$templateCache', function($templateCache) {
+angular.module('gantt.drawtask.templates', []).run(['$templateCache', function ($templateCache) {
 
 }]);
 

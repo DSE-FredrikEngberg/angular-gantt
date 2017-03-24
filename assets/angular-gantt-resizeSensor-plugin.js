@@ -68,7 +68,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 }());
 
 
-angular.module('gantt.resizeSensor.templates', []).run(['$templateCache', function($templateCache) {
+angular.module('gantt.resizeSensor.templates', []).run(['$templateCache', function ($templateCache) {
 
 }]);
 

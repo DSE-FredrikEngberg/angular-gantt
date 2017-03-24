@@ -283,7 +283,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 }());
 
 
-angular.module('gantt.tooltips.templates', []).run(['$templateCache', function($templateCache) {
+angular.module('gantt.tooltips.templates', []).run(['$templateCache', function ($templateCache) {
     $templateCache.put('plugins/tooltips/tooltip.tmpl.html',
         '<div ng-cloak\n' +
         '     class="gantt-task-info"\n' +

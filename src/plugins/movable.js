@@ -448,7 +448,8 @@
                             });
 
                             if (taskScope.task.isResizing) {
-                                taskHasBeenMovedFromAnotherRow = true;
+                                // PATCH: Fixed bug which caused tasks to "jump around" when being drawn.
+                                taskHasBeenMovedFromAnotherRow = false;
                                 enableMoveMode('E', taskScope.task.mouseOffsetX);
                                 delete taskScope.task.isResizing;
                             } else if (taskScope.task.isMoving) {
