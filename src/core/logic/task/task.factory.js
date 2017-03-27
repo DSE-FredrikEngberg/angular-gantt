@@ -1,12 +1,47 @@
 (function() {
     'use strict';
     angular.module('gantt').factory('GanttTask', ['moment', function(moment) {
+
+        /* GENERAL NOTES ON ALIGNMENT OF TASKS TO THE SELECTED CHANGE UNIT
+
+             The following changes overrides are made to get a consistent behaviour when moving or resizing tasks.
+
+             Rules used in this implementation:
+             1.  When a task is moved it's start is aligned to the beginning of the current change unit (day,
+                 week, month, year).
+             2.  When the beginning of a task is moved (resize) it is aligned to the beginning of the current
+                 change unit.no
+             3.  When the end of a task is moved (resize) it is aligned to the end of the current change unit.
+
+             For example if the unit is day a one day task will be represented as this:
+             {
+                 "id": "15",
+                 "from": "2007-02-12T00:00:00.000+01:00",
+                 "to": "2007-02-18T23:59:59.999+01:00"
+             }
+
+             Only change units supported directly by moment.js can currently be used.
+
+         */
+
+        var moveToCallbackFn, moveToCallbackFnThis;
+
         var Task = function(row, model) {
             this.rowsManager = row.rowsManager;
             this.row = row;
             this.model = model;
             this.truncatedLeft = false;
             this.truncatedRight = false;
+        };
+
+        Task.registerMoveToCallBack = function(callbackFn, thisArg) {
+            moveToCallbackFn = callbackFn;
+            moveToCallbackFnThis = thisArg;
+        };
+
+        Task.unregisterCallBack =  function() {
+            moveToCallbackFn = undefined;
+            moveToCallbackFnThis = undefined;
         };
 
         Task.prototype.isMilestone = function() {
@@ -138,40 +173,64 @@
         };
 
         // Expands the start of the task to the specified position (in em)
+        // The override uses moment.startOf() to always align the beginning of a task with beginning of
+        // the current change unit. The angular-gantt version is a mess.
         Task.prototype.setFrom = function(x, magnetEnabled) {
-            this.model.from = this.rowsManager.gantt.getDateByPosition(x, magnetEnabled);
+            this.model.from = this.rowsManager.gantt.getDateByPosition(x, false);
+            if (magnetEnabled) {
+                this.model.from = this.model.from.startOf(this.rowsManager.gantt.columnMagnetUnit);
+            }
             this.row.setFromTo();
             this.updatePosAndSize();
         };
 
         // Expands the end of the task to the specified position (in em)
+        // The override uses moment.endOf() to always align the end of a task with the end of the
+        // current change unit.
         Task.prototype.setTo = function(x, magnetEnabled) {
-            this.model.to = this.rowsManager.gantt.getDateByPosition(x, magnetEnabled);
+            this.model.to = this.rowsManager.gantt.getDateByPosition(x, false);
+            if (magnetEnabled) {
+                this.model.to = this.model.to.endOf(this.rowsManager.gantt.columnMagnetUnit);
+            }
             this.row.setFromTo();
             this.updatePosAndSize();
         };
 
         // Moves the task to the specified position (in em)
+        // The override uses moment.startOf() to always align the beginning of a task with beginning of
+        // the current change unit, when moved.
         Task.prototype.moveTo = function(x, magnetEnabled) {
             var newTaskRight;
             var newTaskLeft;
-            if (x > this.modelLeft) {
-                // Driven by right/to side.
-                this.model.to = this.rowsManager.gantt.getDateByPosition(x + this.modelWidth, magnetEnabled);
-                newTaskRight = this.rowsManager.gantt.getPositionByDate(this.model.to);
-                newTaskLeft = newTaskRight - this.modelWidth;
-                this.model.from = this.rowsManager.gantt.getDateByPosition(newTaskLeft, false);
-            } else {
-                // Drive by left/from side.
-                this.model.from = this.rowsManager.gantt.getDateByPosition(x, magnetEnabled);
-                newTaskLeft = this.rowsManager.gantt.getPositionByDate(this.model.from);
-                newTaskRight = newTaskLeft + this.modelWidth;
-                this.model.to = this.rowsManager.gantt.getDateByPosition(newTaskRight, false);
+
+            this.model.from = this.rowsManager.gantt.getDateByPosition(x, false);
+            if (magnetEnabled) {
+                this.model.from = this.model.from.startOf(this.rowsManager.gantt.columnMagnetUnit);
             }
+            newTaskLeft = this.rowsManager.gantt.getPositionByDate(this.model.from);
+            newTaskRight = newTaskLeft + this.modelWidth;
+            this.model.to = this.rowsManager.gantt.getDateByPosition(newTaskRight, false);
 
             this.row.setFromTo();
             this.updatePosAndSize();
         };
+
+        // Override the moveTo method on the Task type to be able to properly detect when a task is being moved
+        // this is a workaround for a limitation in `angular-gantt-plugins`. The problem is that a task is
+        // moved before the event `moveBegin` is raised. This makes it impossible to know the original state,
+        // and to save this undo information. An alternative would be to store undo information for all tasks
+        // always, but this would be much more work and possibly be yet another performance load.
+        // Note: This around-advice-construction doesn't use any public API of angular-gantt and may not
+        // be compatible with future versions of the library.
+        Task.prototype.moveTo = (function(originalFn) {
+            return function(x, magnetEnabled) {
+                var task = this;
+                if (moveToCallbackFn) {
+                    moveToCallbackFn.call(moveToCallbackFnThis, task.model);
+                }
+                originalFn.call(task, x, magnetEnabled);
+            };
+        })(Task.prototype.moveTo);
 
         Task.prototype.clone = function() {
             return new Task(this.row, angular.copy(this.model));

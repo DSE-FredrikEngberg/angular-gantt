@@ -122,6 +122,11 @@ module.exports = function(grunt) {
                         // includes files within path
                         {expand: true, cwd: 'gh-pages/', src: ['**'], dest: 'site/'},
                     ]
+                },
+                assetsToSpaUIEndorsed: {
+                    files: [
+                        {expand: true, cwd: 'assets/', src: ['angular-gantt.js', 'angular-gantt.css', 'angular-gantt-plugins.js', 'angular-gantt-plugins.css'], dest: '/Users/fredrik/Dev/Projects/DSE/spa-ui/pulsar-spa-ui/modules/2-spi/spa-ui-spi/resources/spa/endorsed/angular-gantt'},
+                    ]
                 }
             },
             jshint: {
@@ -311,6 +316,8 @@ module.exports = function(grunt) {
     grunt.registerTask('uploadSite', ['gh-pages']);
 
     grunt.registerTask('dist', ['clean:dist', 'build', 'buildSite', 'copy:assetsToDist', 'uglify', 'cssmin']);
+
+    grunt.registerTask('dist-local', ['clean:dist', 'build', 'copy:assetsToDist', 'uglify', 'cssmin', 'copy:assetsToSpaUIEndorsed']);
 
     grunt.registerTask('plunker', ['connect:plunker']);
 

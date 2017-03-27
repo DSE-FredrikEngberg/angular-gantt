@@ -10,6 +10,7 @@
 /coverage-results/
 /assets/*.map
 /assets/*.min.*
+/dist/*.min.*
 *.log
 /.bowerrc
 /.grunt/

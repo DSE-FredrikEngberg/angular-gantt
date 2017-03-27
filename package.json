@@ -1,7 +1,7 @@
 {
   "name": "angular-gantt",
-  "version": "1.2.11",
-  "description": "Gantt chart component for AngularJS",
+  "version": "1.2.11-fork-1.0.0",
+  "description": "Gantt chart component for AngularJS - DSEAB Fork",
   "author": "Marco Schweighauser",
   "contributors": [
     "Rémi Alvergnat"
