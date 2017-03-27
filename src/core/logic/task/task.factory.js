@@ -203,6 +203,15 @@
             var newTaskRight;
             var newTaskLeft;
 
+            // PATCH: Add a callback to the moveTo method on the Task type to be able to properly detect when a
+            // task is being moved The problem is that a task is moved before the event `moveBegin` is raised.
+            // This makes it impossible to know the original state, and to save this undo information. An alternative
+            // would be to store undo information for all tasks always, but this would be much more work and possibly
+            // be yet another performance load.
+            if (moveToCallbackFn) {
+                moveToCallbackFn.call(moveToCallbackFnThis, this.model);
+            }
+
             this.model.from = this.rowsManager.gantt.getDateByPosition(x, false);
             if (magnetEnabled) {
                 this.model.from = this.model.from.startOf(this.rowsManager.gantt.columnMagnetUnit);
@@ -214,23 +223,6 @@
             this.row.setFromTo();
             this.updatePosAndSize();
         };
-
-        // Override the moveTo method on the Task type to be able to properly detect when a task is being moved
-        // this is a workaround for a limitation in `angular-gantt-plugins`. The problem is that a task is
-        // moved before the event `moveBegin` is raised. This makes it impossible to know the original state,
-        // and to save this undo information. An alternative would be to store undo information for all tasks
-        // always, but this would be much more work and possibly be yet another performance load.
-        // Note: This around-advice-construction doesn't use any public API of angular-gantt and may not
-        // be compatible with future versions of the library.
-        Task.prototype.moveTo = (function(originalFn) {
-            return function(x, magnetEnabled) {
-                var task = this;
-                if (moveToCallbackFn) {
-                    moveToCallbackFn.call(moveToCallbackFnThis, task.model);
-                }
-                originalFn.call(task, x, magnetEnabled);
-            };
-        })(Task.prototype.moveTo);
 
         Task.prototype.clone = function() {
             return new Task(this.row, angular.copy(this.model));
